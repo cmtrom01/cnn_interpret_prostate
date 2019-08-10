@@ -7,6 +7,55 @@ Created on Sat Aug  3 18:04:14 2019
 """
 
 
+
+drive.mount('/content/gdrive/')
+
+##import google drive files
+drive.mount('/content/gdrive/')
+much_data = np.load('/content/gdrive/My Drive/imgFileNew.npy')
+labels = np.load('/content/gdrive/My Drive/labelsNew.npy')
+
+
+# scale the raw pixel intensities to the range [0, 1] bc pixels are 0 to 255
+data = np.array(much_data, dtype="float") ##/ 4630.0
+labels = np.array(labels)
+data = data.reshape([-1, 50, 50])
+
+
+
+(trainX, testX, trainY, testY) = train_test_split(data,
+	labels, test_size=0.3, random_state = 48)
+
+##first num should be number of images
+trainX = trainX.reshape([-1, 50, 50])
+testX = testX.reshape([-1,50, 50])
+
+
+from keras.models import model_from_json
+
+# Model reconstruction from JSON file
+with open('/content/gdrive/My Drive/model.json', 'r') as f:
+    model = model_from_json(f.read())
+    
+
+# Load weights into the new model
+model.load_weights('/content/gdrive/My Drive/model.h5')
+
+##model.summary()
+
+imgRead = pydicom.dcmread('/content/gdrive/My Drive/1.dcm').pixel_array
+#print(imgRead.shape)
+img = cv2.resize(imgRead, dsize=(50, 50), interpolation=cv2.INTER_CUBIC)
+img = img.reshape([50, 50,1])
+
+model.summary()
+
+
+print("plot of original image: ")
+plt.imshow(imgRead, cmap=plt.cm.bone)
+plt.show()
+
+
 ##VISUALIZE FILTERS
 
 x1w = model.get_weights()[0][:,:,0,:]
